@@ -1,0 +1,99 @@
+<exporter version="1.0">
+	<name>defold</name>
+	<displayName>Defold</displayName>
+	<description>Generates Defold's Atlas file</description>
+	<version>1.0</version>
+	<files>
+		<file>
+			<name>atlas</name>
+			<displayName>Atlas file</displayName>
+			<fileExtension>atlas</fileExtension>
+			<description>Sprite sheet data</description>
+			<template>defold.atlas</template>
+		</file>
+	</files>
+
+	<supportsTrimming>true</supportsTrimming>
+	<supportsRotation>false</supportsRotation>
+	<supportsPivotPoint>false</supportsPivotPoint>
+	<spriteOrigin>TopLeft</spriteOrigin>
+	<supportsNPOT>false</supportsNPOT>
+	<supportsMultiPack>false</supportsMultiPack>
+	<supportsTrimSpriteNames>false</supportsTrimSpriteNames>
+	<supportsTextureSubPath>false</supportsTextureSubPath>
+	<supportsAnimations>false</supportsAnimations>
+
+	<properties>
+		<property>
+			<name>assets_path</name>
+			<type>string</type>
+			<displayName>Assets Path</displayName>
+			<toolTip>Path to exported images directory relative to Defold's project root. Placeholders: {atlas_name}, {animation_name}</toolTip>
+			<default>assets/{atlas_name}/{animation_name}</default>
+		</property>
+
+		<property>
+			<name>margin</name>
+			<type>string</type>
+			<displayName>Atlas: Margin</displayName>
+			<toolTip>Defold's Atlas margin value</toolTip>
+			<default>0</default>
+		</property>
+
+		<property>
+			<name>extrude_borders</name>
+			<type>string</type>
+			<displayName>Atlas: Extrude Borders</displayName>
+			<toolTip>Defold's Atlas Extrude Borders value</toolTip>
+			<default>0</default>
+		</property>
+
+		<property>
+			<name>inner_padding</name>
+			<type>string</type>
+			<displayName>Atlas: Inner Padding</displayName>
+			<toolTip>Defold's Atlas Inner Padding value</toolTip>
+			<default>0</default>
+		</property>
+
+		<property>
+			<name>animations_trim</name>
+			<type>string</type>
+			<displayName>Animations: Trim</displayName>
+			<toolTip>List of trim settings for each animation</toolTip>
+			<default>off</default>
+		</property>
+
+		<property>
+			<name>animations_playback</name>
+			<type>string</type>
+			<displayName>Animations: Playback</displayName>
+			<toolTip>List of playback settings for each animation</toolTip>
+			<default>once_forward</default>
+		</property>
+
+		<property>
+			<name>animations_fps</name>
+			<type>string</type>
+			<displayName>Animations: FPS</displayName>
+			<toolTip>List of FPS settings for each animation</toolTip>
+			<default>60</default>
+		</property>
+
+		<property>
+			<name>animations_flip</name>
+			<type>string</type>
+			<displayName>Animations: Flip</displayName>
+			<toolTip>List of flip settings for each animation</toolTip>
+			<default></default>
+		</property>
+	</properties>
+
+	<defaults>
+		<extrude>0</extrude>
+		<shapePadding>0</shapePadding>
+		<borderPadding>0</borderPadding>
+		<trimMode>Trim</trimMode>
+		<sizeConstraints>AnySize</sizeConstraints>
+	</defaults>
+</exporter>
