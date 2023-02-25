@@ -64,8 +64,6 @@ function extractAnimations(context, data) {
 				animations.set(animationName, []);
 			}
 			let animation = animations.get(animationName);
-			let animationPath = rootPath.replace('{animation_name}', animationName) + '/';
-			sprite.imagePath = animationPath + animation.length.toString() + '.png'; // Remember the path so we can construct a correct filename.
 
 			// Find a duplicate sprite.
 			for (let j = 0; j < sprite.aliasList.length; ++j) {
@@ -74,18 +72,19 @@ function extractAnimations(context, data) {
 			}
 			if (aliases.has(spriteName)) {
 				sprite = aliases.get(spriteName);
+			} else {
+				const animationPath = rootPath.replace('{animation_name}', animationName) + '/';
+				sprite.defoldImagePath = animationPath + animation.length.toString() + '.png'; // Remember the path so we can construct a correct filename.
 			}
-
 			animation.push(sprite);
 		}
 	}
 	return animations;
 }
 
-function exportImage(output, imagePath, sprite, trimMode, identLevel) {
+function exportImage(output, sprite, trimMode, identLevel) {
 	output.push(
-		field('image', imagePath, identLevel, true),
-		//field('sprite', sprite.trimmedName, identLevel, true),
+		field('image', sprite.defoldImagePath, identLevel, true),
 		field('sprite_trim_mode', trimMode, identLevel)
 	);
 	if (sprite.trimmed) {
@@ -107,15 +106,15 @@ function exportAnimation(context, output, animationName, animation) {
 	if (context.animationSettings.has(animationName)) {
 		animationSettings = context.animationSettings.get(animationName);
 	}
-	let trimMode = getAnimationSettingOrDefault(context, animationSettings, 'trim');
+	const trimMode = getAnimationSettingOrDefault(context, animationSettings, 'trim');
 
 	output.push('animations {');
 	let identLevel = 1;
 	output.push(field('id', animationName, identLevel, true));
 	for (let i = 0; i < animation.length; ++i) {
-		let sprite = animation[i];
+		const sprite = animation[i];
 		output.push(ident(identLevel) + 'images {');
-		exportImage(output, sprite.imagePath, sprite, trimMode, identLevel + 1);
+		exportImage(output, sprite, trimMode, identLevel + 1);
 		output.push(ident(identLevel) + '}');
 	}
 
@@ -189,17 +188,23 @@ function parseAnimationSettings(context, properties) {
 	}
 }
 
-function ExportData(data) {
-	let context = {
+function createDefaultContext(data) {
+	return {
 		atlasName: data.texture.trimmedName,
-		assetsPath: data.exporterProperties.assets_path,
-		animationSettings: new Map(),
-		animationDefaultSettings: {
-			trim: 'SPRITE_TRIM_MODE_OFF',
-			playback: 'PLAYBACK_ONCE_FORWARD',
-			fps: 60,
-			flip: ''
-		}
+		assetsPath: data.exporterProperties.assets_path
+	};
+}
+
+// EXPORT ATLAS
+
+function ExportData(data) {
+	let context = createDefaultContext(data);
+	context.animationSettings = new Map();
+	context.animationDefaultSettings = {
+		trim: 'SPRITE_TRIM_MODE_OFF',
+		playback: 'PLAYBACK_ONCE_FORWARD',
+		fps: 60,
+		flip: ''
 	};
 	parseAnimationSettings(context, data.exporterProperties);
 
@@ -222,3 +227,65 @@ function ExportData(data) {
 
 ExportData.filterName = 'ExportData';
 Library.addFilter('ExportData');
+
+// EXPORT SPLIT JSON
+
+function identTab(count) {
+	return '\t'.repeat(count);
+}
+
+function jsonField(fieldName, value, identLevel = 0, isQuoted = false, isLast = false) {
+	return identTab(identLevel) + quote(fieldName) + ': ' + (isQuoted ? quote(value) : value) + (isLast ? '' : ',');
+}
+
+function exportSprite(output, sprite, identLevel, isLast = false) {
+	output.push(identTab(identLevel) + '{');
+	++identLevel;
+
+	output.push(
+		jsonField('path', sprite.defoldImagePath, identLevel, true),
+		jsonField('x', sprite.frameRect.x, identLevel, false),
+		jsonField('y', sprite.frameRect.y, identLevel, false),
+		jsonField('width', sprite.frameRect.width, identLevel, false),
+		jsonField('height', sprite.frameRect.height, identLevel, false, true)
+	);
+
+	--identLevel;
+	output.push(identTab(identLevel) + '}' + (isLast ? '' : ','));
+}
+
+function ExportSplitJsonData(data) {
+	let context = createDefaultContext(data);
+	// Mark sprites for export by adding .defoldImagePath to them.
+	extractAnimations(context, data);
+
+	let spritesToExport = [];
+	for (let i = 0; i < data.allSprites.length; ++i) {
+		const sprite = data.allSprites[i];
+		if (typeof(sprite.defoldImagePath) == 'string') {
+			spritesToExport.push(sprite);
+		}
+	}
+
+	let output = ['{'];
+
+	let identLevel = 1;
+	output.push(jsonField('spritesheetFilename', data.texture.fullName, identLevel, true));
+	output.push(jsonField('spritesheetFullPath', data.texture.absoluteFileName, identLevel, true));
+
+	output.push(identTab(identLevel) + '"sprites": [');
+	++identLevel;
+	for (let i = 0; i < spritesToExport.length; ++i) {
+		const sprite = spritesToExport[i];
+		exportSprite(output, sprite, identLevel, i == spritesToExport.length - 1);
+	}
+	--identLevel;
+	output.push(identTab(identLevel) + ']');
+
+	output.push('}', '');
+
+	return output.join('\n');
+}
+
+ExportSplitJsonData.filterName = 'ExportSplitJsonData';
+Library.addFilter('ExportSplitJsonData');

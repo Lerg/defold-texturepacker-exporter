@@ -11,6 +11,13 @@
 			<description>Sprite sheet data</description>
 			<template>defold.atlas</template>
 		</file>
+		<file>
+			<name>split-json</name>
+			<displayName>Split info file</displayName>
+			<fileExtension>json</fileExtension>
+			<description>Information for splitting the spritesheet into individual frame image files</description>
+			<template>defold.json</template>
+		</file>
 	</files>
 
 	<supportsTrimming>true</supportsTrimming>
