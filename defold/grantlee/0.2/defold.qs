@@ -1,37 +1,3 @@
-/*function introspect(value, name, indent) {
-	indent = indent || '';
-	name = name || '';
-	if (value === null) {
-		return indent+name+' = null';
-	}
-	var objType = typeof value;
-	var info = indent+name+' = ';
-	if (objType === 'undefined') {
-		return info+'undefined\n';
-	} else if (objType === 'object') {
-		var propInfo = '';
-		var prop;
-		for (prop in value) {
-			if(prop !== 'objectName') {
-				var p = introspect(value[prop], prop, indent+'    ');
-				if(p !== '') {
-					propInfo += p +'\n';
-				}
-			}
-		}
-		if(propInfo==='') {
-			info += '{'+value+'}';
-		} else {
-			info += '{\n' + propInfo +indent+'}';
-		}
-	} else if (objType === 'function') {
-		return '';
-	} else {
-		info+=value;
-	}
-	return info;
-}*/
-
 function ensureInt(value) {
 	const intValue = parseInt(value, 10);
 	return isNaN(intValue) ? 0 : intValue;
@@ -51,7 +17,7 @@ function field(fieldName, value, identLevel = 0, isQuoted = false) {
 
 function rsplitOnce(str, sep) {
 	const index = str.lastIndexOf(sep);
-	if (index != -1) {
+	if (index !== -1) {
 		return [str.substring(0, index), str.substring(index)];
 	} else {
 		return [];
@@ -67,7 +33,7 @@ function extractAnimations(context, data) {
 		const spriteName = sprite.trimmedName;
 		let animationName = spriteName;
 		const animationPath = rsplitOnce(spriteName, '/');
-		if (animationPath.length == 2) {
+		if (animationPath.length === 2) {
 			animationName = animationPath[0];
 		}
 		// Store in the animation.
@@ -132,8 +98,8 @@ function exportAnimation(context, output, animationName, animation) {
 	output.push(
 		field('playback', getAnimationSettingOrDefault(context, animationSettings, 'playback'), identLevel),
 		field('fps', getAnimationSettingOrDefault(context, animationSettings, 'fps'), identLevel),
-		field('flip_horizontal', (flip == 'h' || flip == 'hv') ? 1 : 0, identLevel),
-		field('flip_vertical', (flip == 'v' || flip == 'hv') ? 1 : 0, identLevel)
+		field('flip_horizontal', (flip === 'h' || flip === 'hv') ? 1 : 0, identLevel),
+		field('flip_vertical', (flip === 'v' || flip === 'hv') ? 1 : 0, identLevel)
 	);
 	output.push('}');
 }
@@ -163,7 +129,7 @@ function parseAnimationSetting(name, value) {
 		case 'fps': return Math.abs(ensureInt(value));
 		case 'flip':
 			value = value.toLowerCase();
-			if (value == 'h' || value == 'v' || value == 'hv') {
+			if (value === 'h' || value === 'v' || value === 'hv') {
 				return value;
 			} else {
 				return '';
@@ -184,9 +150,9 @@ function parseAnimationSettings(context, properties) {
 		for (let j = 0; j < settings.length; ++j) {
 			const setting = settings[j];
 			const animationNameAndValue = setting.split(':');
-			if (j == 0 && animationNameAndValue.length == 1) {
+			if (j === 0 && animationNameAndValue.length === 1) {
 				context.animationDefaultSettings[shortPropertyName] = parseAnimationSetting(shortPropertyName, animationNameAndValue[0].trim());
-			} else if (animationNameAndValue.length == 2) {
+			} else if (animationNameAndValue.length === 2) {
 				const animationName = animationNameAndValue[0].trim();
 				const value = parseAnimationSetting(shortPropertyName, animationNameAndValue[1].trim());
 				if (!context.animationSettings.has(animationName)) {
@@ -272,7 +238,7 @@ function ExportSplitJsonData(data) {
 	let spritesToExport = [];
 	for (let i = 0; i < data.allSprites.length; ++i) {
 		const sprite = data.allSprites[i];
-		if (typeof(sprite.defoldImagePath) == 'string') {
+		if (typeof(sprite.defoldImagePath) === 'string') {
 			spritesToExport.push(sprite);
 		}
 	}
@@ -286,7 +252,7 @@ function ExportSplitJsonData(data) {
 	++identLevel;
 	for (let i = 0; i < spritesToExport.length; ++i) {
 		const sprite = spritesToExport[i];
-		exportSprite(output, sprite, identLevel, i == spritesToExport.length - 1);
+		exportSprite(output, sprite, identLevel, i === spritesToExport.length - 1);
 	}
 	--identLevel;
 	output.push(identTab(identLevel) + ']');
