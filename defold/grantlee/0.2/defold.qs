@@ -49,6 +49,15 @@ function field(fieldName, value, identLevel = 0, isQuoted = false) {
 	return ident(identLevel) + fieldName + ': ' + (isQuoted ? quote(value) : value);
 }
 
+function rsplitOnce(str, sep) {
+	const index = str.lastIndexOf(sep);
+	if (index != -1) {
+		return [str.substring(0, index), str.substring(index)];
+	} else {
+		return [];
+	}
+}
+
 function extractAnimations(context, data) {
 	let animations = new Map();
 	let aliases = new Map();
@@ -56,28 +65,29 @@ function extractAnimations(context, data) {
 	for (let i = 0; i < data.allSprites.length; ++i) {
 		let sprite = data.allSprites[i];
 		const spriteName = sprite.trimmedName;
-		const nameAndFrame = spriteName.split('/');
-		if (nameAndFrame.length > 1) {
-			// Store in the animation.
-			const animationName = nameAndFrame[0];
-			if (!animations.has(animationName)) {
-				animations.set(animationName, []);
-			}
-			let animation = animations.get(animationName);
-
-			// Find a duplicate sprite.
-			for (let j = 0; j < sprite.aliasList.length; ++j) {
-				const aliasSprite = sprite.aliasList[j];
-				aliases.set(aliasSprite.trimmedName, sprite);
-			}
-			if (aliases.has(spriteName)) {
-				sprite = aliases.get(spriteName);
-			} else {
-				const animationPath = rootPath.replace('{animation_name}', animationName) + '/';
-				sprite.defoldImagePath = animationPath + animation.length.toString() + '.png'; // Remember the path so we can construct a correct filename.
-			}
-			animation.push(sprite);
+		let animationName = spriteName;
+		const animationPath = rsplitOnce(spriteName, '/');
+		if (animationPath.length == 2) {
+			animationName = animationPath[0];
 		}
+		// Store in the animation.
+		if (!animations.has(animationName)) {
+			animations.set(animationName, []);
+		}
+		let animation = animations.get(animationName);
+
+		// Find a duplicate sprite.
+		for (let j = 0; j < sprite.aliasList.length; ++j) {
+			const aliasSprite = sprite.aliasList[j];
+			aliases.set(aliasSprite.trimmedName, sprite);
+		}
+		if (aliases.has(spriteName)) {
+			sprite = aliases.get(spriteName);
+		} else {
+			const animationPath = rootPath.replace('{animation_name}', animationName) + '/';
+			sprite.defoldImagePath = animationPath + animation.length.toString() + '.png'; // Remember the path so we can construct a correct filename.
+		}
+		animation.push(sprite);
 	}
 	return animations;
 }
@@ -271,7 +281,6 @@ function ExportSplitJsonData(data) {
 
 	let identLevel = 1;
 	output.push(jsonField('spritesheetFilename', data.texture.fullName, identLevel, true));
-	output.push(jsonField('spritesheetFullPath', data.texture.absoluteFileName, identLevel, true));
 
 	output.push(identTab(identLevel) + '"sprites": [');
 	++identLevel;

@@ -9,7 +9,8 @@ The exporter generates a native Atlas file for Defold and it supports setting De
 
 Due to the fact that Defold packs images on it's own the resulting spritesheet has to be split up into individual images.
 
-This can be achieved with a special editor script.
+This can be achieved with a special editor script that you can install from here
+https://github.com/Lerg/defold-editor-script-spritesheet
 
 ## Settings
 
