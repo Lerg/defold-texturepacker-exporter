@@ -48,7 +48,8 @@ function extractAnimations(context, data) {
 			aliases.set(aliasSprite.trimmedName, sprite);
 		}
 		if (aliases.has(spriteName)) {
-			sprite = aliases.get(spriteName);
+			const duplicate_sprite = aliases.get(spriteName);
+			sprite.defoldImagePath = duplicate_sprite.defoldImagePath;
 		} else {
 			const animationPath = rootPath.replace('{animation_name}', animationName) + '/';
 			sprite.defoldImagePath = animationPath + animation.length.toString() + '.png'; // Remember the path so we can construct a correct filename.
